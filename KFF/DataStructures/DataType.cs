@@ -2,7 +2,7 @@
 namespace KFF.DataStructures
 {
 	/// <summary>
-	/// Represents a KFF data type. AABBCC
+	/// Represents a KFF data type.
 	/// </summary>
 	public enum DataType : sbyte
 	{
