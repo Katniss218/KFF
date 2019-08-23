@@ -1,0 +1,7 @@
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\obj\Debug\KFFClassLib.csprojAssemblyReference.cache
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\obj\Debug\KFFClassLib.csproj.CoreCompileInputs.cache
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\bin\Debug\KFF.xml
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\bin\Debug\KFF.dll
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\bin\Debug\KFF.pdb
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\obj\Debug\KFF.dll
+C:\Users\Katniss218\source\repos\KFFClassLib\KFFClassLib\obj\Debug\KFF.pdb

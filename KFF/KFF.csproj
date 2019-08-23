@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{58910457-EA71-4C83-8C1D-E0FA2D5806E1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KFF</RootNamespace>
+    <AssemblyName>KFF</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Debug\KFF.xml</DocumentationFile>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <NoWarn>1591 0660 0661</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>bin\Release\KFF.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataStructures\Object.cs" />
+    <Compile Include="DataStructures\Payload.cs" />
+    <Compile Include="DataStructures\PayloadBoolean.cs" />
+    <Compile Include="DataStructures\PayloadClass.cs" />
+    <Compile Include="DataStructures\PayloadDecimal.cs" />
+    <Compile Include="DataStructures\PayloadInteger.cs" />
+    <Compile Include="DataStructures\PayloadList.cs" />
+    <Compile Include="DataStructures\PayloadString.cs" />
+    <Compile Include="Exceptions\KFFObjectPresenceException.cs" />
+    <Compile Include="DataStructures\DataType.cs" />
+    <Compile Include="DataStructures\IClass.cs" />
+    <Compile Include="DataStructures\IList.cs" />
+    <Compile Include="DataStructures\KFFFile.cs" />
+    <Compile Include="DataStructures\ObjectType.cs" />
+    <Compile Include="DataStructures\Tag.cs" />
+    <Compile Include="DataStructures\TagBoolean.cs" />
+    <Compile Include="DataStructures\TagClass.cs" />
+    <Compile Include="DataStructures\TagDecimal.cs" />
+    <Compile Include="DataStructures\TagInteger.cs" />
+    <Compile Include="DataStructures\TagList.cs" />
+    <Compile Include="DataStructures\TagString.cs" />
+    <Compile Include="Exceptions\KFFEndOfFileException.cs" />
+    <Compile Include="Exceptions\KFFException.cs" />
+    <Compile Include="Exceptions\KFFReadWriteException.cs" />
+    <Compile Include="Exceptions\KFFSerializationException.cs" />
+    <Compile Include="Exceptions\KFFParseException.cs" />
+    <Compile Include="IKFFSerializable.cs" />
+    <Compile Include="KFFParser.cs" />
+    <Compile Include="KFFSerializer.cs" />
+    <Compile Include="KFFValidator.cs" />
+    <Compile Include="LineData.cs" />
+    <Compile Include="NewLineConfig.cs" />
+    <Compile Include="Paths\Path.cs" />
+    <Compile Include="Paths\PathDirection.cs" />
+    <Compile Include="Paths\PathSegment.cs" />
+    <Compile Include="Syntax.cs" />
+    <Compile Include="TagTester.cs" />
+    <Compile Include="MathHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

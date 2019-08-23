@@ -1,0 +1,6 @@
+H:\VisualStudioWorkspace\KFF\KFF\bin\Release\KFF.xml
+H:\VisualStudioWorkspace\KFF\KFF\bin\Release\KFF.dll
+H:\VisualStudioWorkspace\KFF\KFF\bin\Release\KFF.pdb
+H:\VisualStudioWorkspace\KFF\KFF\obj\Release\KFF.csproj.CoreCompileInputs.cache
+H:\VisualStudioWorkspace\KFF\KFF\obj\Release\KFF.dll
+H:\VisualStudioWorkspace\KFF\KFF\obj\Release\KFF.pdb
