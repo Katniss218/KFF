@@ -1,6 +1,4 @@
-﻿using KFF.DataStructures;
-
-namespace KFF
+﻿namespace KFF
 {
 	/// <summary>
 	/// Implement this if you want to create an object that can be serialized into KFF.
