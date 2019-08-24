@@ -18,3 +18,4 @@ H:\GIT\KFF\KFF\bin\Debug\KFF.pdb
 H:\GIT\KFF\KFF\obj\Debug\KFF.csproj.CoreCompileInputs.cache
 H:\GIT\KFF\KFF\obj\Debug\KFF.dll
 H:\GIT\KFF\KFF\obj\Debug\KFF.pdb
+H:\GIT\KFF\KFF\obj\Debug\KFF.csprojAssemblyReference.cache

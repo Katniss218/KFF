@@ -13,6 +13,65 @@ namespace KFF
 	public sealed class KFFSerializer
 	{
 		/// <summary>
+		/// Contains the results of the analysis operation.
+		/// </summary>
+		public sealed class AnalysisData
+		{
+			/// <summary>
+			/// True if the analysis found a tag or payload at the specified path (Read Only).
+			/// </summary>
+			public bool isSuccess { get; private set; }
+			/// <summary>
+			/// Checks if the analysis DIDN'T found any tags or payloads at the specified path (Read Only).
+			/// </summary>
+			public bool isFail { get { return !this.isSuccess; } }
+
+			/// <summary>
+			/// Contains the number of children (nested objects) of the analyzed object (Read Only).
+			/// </summary>
+			public int childCount { get; private set; }
+
+			/// <summary>
+			/// Is true if the current analyzed object is a tag, false otherwise (Read Only).
+			/// </summary>
+			public bool isTag { get; private set; }
+
+			/// <summary>
+			/// Is true if the current analyzed object is a payload, false otherwise (Read Only).
+			/// </summary>
+			public bool isPayload { get; private set; }
+
+			internal AnalysisData( Object obj )
+			{
+				if( obj == null )
+				{
+					this.isSuccess = false;
+					this.isTag = false;
+					this.isPayload = false;
+					this.childCount = 0;
+				}
+				else
+				{
+					this.isSuccess = true;
+					this.isTag = obj.isTag;
+					this.isPayload = obj.isPayload;
+
+					if( obj.type == DataType.Class )
+					{
+						this.childCount = ((IClass)obj).count;
+					}
+					else if( obj.type == DataType.List )
+					{
+						this.childCount = ((IList)obj).count;
+					}
+					else
+					{
+						this.childCount = 0;
+					}
+				}
+			}
+		}
+		/// <summary>
 		/// Contains the root object of the current scope. Either a tag or payload. You shouldn't mess with this, unless you know what you are doing.
 		/// <para>
 		/// This can, BY DESIGN, be set outside of the file, to be able read/write from objects, that are not in the file.
@@ -20,10 +79,7 @@ namespace KFF
 		/// </para>
 		/// </summary>
 		public Object scopeRoot { get; set; }
-
-		// The last analyzed object.
-		private Object analyzed = null;
-
+		
 		/// <summary>
 		/// Contains the file that the serializer operates on. The scope is reset to this file upon calling the 'ResetScope()' method (Read Only).
 		/// </summary>
@@ -170,88 +226,25 @@ namespace KFF
 
 
 		/// <summary>
-		/// Analyzes an object at the end of the path. Returns true if a path is valid, and leads to a valid KFF object.
+		/// Performs an Analysis operation on the object at the end of the path. Returns true if a path is valid, and leads to a valid KFF object.
 		/// <para>
-		/// You can use this in conjunction with other methods to obtain information about objects inside a KFF file.
+		/// You can use this to obtain information about objects inside a KFF file.
 		/// </para>
 		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		public bool Analyze( Path path )
+		/// <param name="path">The path to the object to analyze.</param>
+		public AnalysisData Analyze( Path path )
 		{
 			try
 			{
-				this.analyzed = MoveScope( path, false );
-				return true;
+				Object analyzed = MoveScope( path, false );
+				return new AnalysisData( analyzed );
 			}
 			catch( KFFException )
 			{
-				return false;
+				return new AnalysisData( null );
 			}
 		}
-
-		/// <summary>
-		/// Returns the number of child tags/payloads of the analyzed object. Returns 0 if the object is primitive (Read Only).
-		/// </summary>
-		public int aChildCount
-		{
-			get
-			{
-				if( this.analyzed.type == DataType.Class )
-				{
-					return ((IClass)this.analyzed).count;
-				}
-				if( this.analyzed.type == DataType.List )
-				{
-					return ((IList)this.analyzed).count;
-				}
-				return 0;
-			}
-		}
-
-		/// <summary>
-		/// Checks if the analysis found a tag or payload at the specified path.
-		/// </summary>
-		public bool aSuccess
-		{
-			get
-			{
-				return this.analyzed != null;
-			}
-		}
-
-		/// <summary>
-		/// Checks if the analysis FAILED to find a tag or payload at the specified path.
-		/// </summary>
-		public bool aFail
-		{
-			get
-			{
-				return this.analyzed == null;
-			}
-		}
-
-		/// <summary>
-		/// Returns true if the current analyzed object is a tag, false otherwise.
-		/// </summary>
-		public bool aIsTag
-		{
-			get
-			{
-				return this.analyzed.isTag;
-			}
-		}
-
-		/// <summary>
-		/// Returns true if the current analyzed object is a payload, false otherwise.
-		/// </summary>
-		public bool aIsPayload
-		{
-			get
-			{
-				return this.analyzed.isPayload;
-			}
-		}
+		
 
 
 

@@ -18,8 +18,8 @@ using System.Runtime.InteropServices;
 // Następujący identyfikator GUID jest identyfikatorem biblioteki typów w przypadku udostępnienia tego projektu w modelu COM
 [assembly: Guid("58910457-ea71-4c83-8c1d-e0fa2d5806e1")]
 
-[assembly: AssemblyVersion( "1.0.4" )]
-[assembly: AssemblyFileVersion("1.0.4")] // wersja produktu
+[assembly: AssemblyVersion( "1.0.5" )]
+[assembly: AssemblyFileVersion("1.0.5")] // wersja produktu
 [assembly: NeutralResourcesLanguage( "" )]
 
 /*
@@ -33,5 +33,8 @@ using System.Runtime.InteropServices;
  * 
  * 1.0.4 - Added ability to check if the analysis was successful (tag/payload was found).
  *       - Empty strings can now be read as any array type by KFFSerializer.
+ * 
+ * 1.0.5 - Changed the analysis operation to use a new class structure called AnalysysData.
+ * 
  * 
  */
