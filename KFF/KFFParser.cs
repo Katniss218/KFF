@@ -133,7 +133,7 @@ namespace KFF
 				
 				return sb.ToString();
 			}
-			throw new KFFParseException( "Expected to find [A-Za-z_], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, pos ) + ")." );
+			throw new KFFParseException( "Expected to find [A-Za-z_], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 		}
 
 		private void Digits( ref StringBuilder sb )
@@ -595,6 +595,7 @@ namespace KFF
 				return new KFFFile( fileName );
 			}
 
+			this.fileName = fileName;
 			this.s = s;
 			this.pos = 0;
 
@@ -840,7 +841,7 @@ namespace KFF
 			}
 			else
 			{
-				throw new Exception( "Unknown Tag type '" + t.GetType().ToString() + "'!" );
+				throw new KFFException( "Unknown Tag type '" + t.GetType().ToString() + "'!" );
 			}
 
 			// Tag End
@@ -863,6 +864,7 @@ namespace KFF
 		{
 			StringBuilder sb = new StringBuilder();
 			List<Tag> tags = file.tags.value;
+			
 			for( int i = 0; i < tags.Count; i++ )
 			{
 				string tag = StringFromAnyTag( tags[i] );
