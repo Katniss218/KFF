@@ -107,7 +107,7 @@ namespace KFF
 			string contents = File.ReadAllText( path );
 
 			KFFParser parser = new KFFParser();
-			KFFFile kff = parser.Parse( contents );
+			KFFFile kff = parser.Parse( path, contents );
 
 			return new KFFSerializer( kff );
 		}
@@ -1404,9 +1404,7 @@ namespace KFF
 			}
 			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
 		}
-
-		// TODO ----- Add a method for reading serializables, that also implement parameterless constructors.
-
+		
 		public void Deserialize<T>( Path path, T serializableObj ) where T : IKFFSerializable
 		{
 			// save the scope locally and modify the real one.

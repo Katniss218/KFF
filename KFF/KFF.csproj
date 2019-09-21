@@ -73,9 +73,8 @@
     <Compile Include="IKFFSerializable.cs" />
     <Compile Include="KFFParser.cs" />
     <Compile Include="KFFSerializer.cs" />
-    <Compile Include="KFFValidator.cs" />
-    <Compile Include="LineData.cs" />
     <Compile Include="NewLineConfig.cs" />
+    <Compile Include="NumberFormatter.cs" />
     <Compile Include="Paths\Path.cs" />
     <Compile Include="Paths\PathDirection.cs" />
     <Compile Include="Paths\PathSegment.cs" />
@@ -83,6 +82,7 @@
     <Compile Include="TagTester.cs" />
     <Compile Include="MathHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextFileData.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

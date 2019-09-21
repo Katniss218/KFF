@@ -19,34 +19,66 @@ namespace KFF
 
 		// Contains the direction to take when traversing along the path. Forward to move deeper, Backward to move... back (Read Only).
 		internal readonly PathDirection direction;
-
-
-		// TODO ----- Add method for easily implementing placeholders for variables
-		//   Function( 'Objects.0.Vertices.%', i )
-		//       ( string path_signature, params int variables )
-
+		
 
 		// Creates a new path segment from string.
-		internal PathSegment( string s )
+		internal PathSegment( string s, int[] placeholderValues )
 		{
 			// A valid path segment is:
-			// - A Tag identifier (name), or an index (indicates forward path segment).
+			// - A Tag identifier (name), or an index, or a placeholder to an index (indicates forward path segment).
 			// - A '<' character (indicates backward path segment).
 			if( string.IsNullOrEmpty( s ) )
 			{
 				// Segment is null or empty.
 				throw new ArgumentNullException( "Path Segment can't be empty." );
 			}
+			//
+			// backward path segment.
+			//
 			if( s[0] == Syntax.PATH_BACKWARD )
 			{
 				if( s.Length > 1 )
 				{
-					throw new KFFException( "Expected \"<\", but found \"" + s + "\"." );
+					throw new KFFException( "Expected to find '" + Syntax.PATH_BACKWARD + "', but found '" + s + "'." );
 				}
 				this.direction = PathDirection.Backward;
 				this.index = -1;
 				this.name = null;
 				this.destination = ObjectType.Payload; // N/A, but must be set to something.
+			}
+			//
+			// Placeholder indexed path segment.
+			//
+			else if( s[0] == Syntax.PATH_PLACEHOLDER_OPENING )
+			{
+				// Index of placeholder can only be digits 0-9.
+				for( int i = 1; i < s.Length - 1; i++ )
+				{
+					if( !Syntax.IsDigit( s[i] ) )
+					{
+						throw new KFFException( "Expected to find '" + Syntax.PATH_PLACEHOLDER_CLOSING + "', but found '" + s[i] + "' (char: " + i + ")." );
+					}
+				}
+				if( s[s.Length - 1] == Syntax.PATH_PLACEHOLDER_CLOSING )
+				{
+					string number = s.Substring( 1, s.Length - 2 );
+
+					int placeholderIndex = int.Parse( number );
+
+					if( placeholderIndex >= placeholderValues.Length )
+					{
+						throw new KFFException( "The placeholder index '" + s + "' is outside of bounds of the placeholder values array (length: " + placeholderValues.Length + ")." );
+					}
+
+					this.direction = PathDirection.Forward;
+					this.index = placeholderValues[placeholderIndex];
+					this.name = placeholderValues[placeholderIndex].ToString( Syntax.numberFormat );
+					this.destination = ObjectType.Payload;
+				}
+				else
+				{
+					throw new KFFException( "Expected to find '" + Syntax.PATH_PLACEHOLDER_CLOSING + "', but found '" + s[s.Length - 1] + "' (char: " + (s.Length - 2) + ")." );
+				}
 			}
 			else
 			{
@@ -61,7 +93,7 @@ namespace KFF
 				// Segment is a Tag's identifier (named).
 				else
 				{
-					KFFValidator.ValidateName( s );
+					Tag.ValidateName( s );
 
 					this.direction = PathDirection.Forward;
 					this.name = s;
@@ -70,5 +102,22 @@ namespace KFF
 				}
 			}
 		}
+
+		public static bool operator ==( PathSegment left, PathSegment right )
+		{
+			return left.name == right.name
+				&& left.index == right.index
+				&& left.destination == right.destination
+				&& left.direction == right.direction;
+		}
+
+		public static bool operator !=( PathSegment left, PathSegment right )
+		{
+			return left.name != right.name
+				|| left.index != right.index
+				|| left.destination != right.destination
+				|| left.direction != right.direction;
+		}
+
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using KFF.DataStructures;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 
 namespace KFF
@@ -11,6 +10,7 @@ namespace KFF
 	/// </summary>
 	public sealed class KFFParser
 	{
+		private string fileName;
 		private string s;
 		private int pos;
 		private char currentChar
@@ -88,9 +88,9 @@ namespace KFF
 
 		private void SkipWhiteSpacesAndComments()
 		{
-			while( this.pos < this.s.Length && (Syntax.IsWhiteSpace( currentChar ) || currentChar == Syntax.COMMENT_TOKEN[0]) )
+			while( this.pos < this.s.Length && (Syntax.IsWhiteSpace( currentChar ) || currentChar == Syntax.COMMENT[0]) )
 			{
-				if( SilentPeek( Syntax.COMMENT_TOKEN ) )
+				if( SilentPeek( Syntax.COMMENT ) )
 				{
 					Comment();
 					continue;
@@ -100,22 +100,22 @@ namespace KFF
 					this.pos++;
 					continue;
 				}
-				throw new KFFParseException( "Invalid token '" + currentChar + "' (" + LineData.Calculate( this.s, pos ) + ")." );
+				throw new KFFParseException( "Invalid token '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 			}
 		}
 
 		private void Comment()
 		{
-			pos += Syntax.COMMENT_TOKEN.Length;
+			this.pos += Syntax.COMMENT.Length;
 
 			string lineEnding = Environment.NewLine;
 			do
 			{
-				pos++;
+				this.pos++;
 			}
-			while( this.pos + lineEnding.Length < this.s.Length && s.Substring( pos, lineEnding.Length ) != lineEnding );
+			while( this.pos + lineEnding.Length < this.s.Length && s.Substring( this.pos, lineEnding.Length ) != lineEnding );
 
-			pos += lineEnding.Length;
+			this.pos += lineEnding.Length;
 		}
 		
 		private string Name()
@@ -133,7 +133,7 @@ namespace KFF
 				
 				return sb.ToString();
 			}
-			throw new KFFParseException( "Expected to find [A-Za-z_], but found '" + currentChar + "' (" + LineData.Calculate( this.s, pos ) + ")." );
+			throw new KFFParseException( "Expected to find [A-Za-z_], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, pos ) + ")." );
 		}
 
 		private void Digits( ref StringBuilder sb )
@@ -154,7 +154,7 @@ namespace KFF
 				// If any of the chars is not valid, throw an exception.
 				if( currentChar != Syntax.TOKEN_TRUE[i] )
 				{
-					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_TRUE[i] + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_TRUE[i] + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 
@@ -171,7 +171,7 @@ namespace KFF
 				// If any of the chars is not valid, throw an exception.
 				if( currentChar != Syntax.TOKEN_FALSE[i] )
 				{
-					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_FALSE[i] + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_FALSE[i] + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 
@@ -211,7 +211,7 @@ namespace KFF
 					// If it is escaping an unescapable char...
 					else
 					{
-						throw new KFFParseException( "The char. '" + currentChar + "' isn't escapable (" + LineData.Calculate( this.s, this.pos ) + ")." );
+						throw new KFFParseException( "The char. '" + currentChar + "' isn't escapable (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 					}
 				}
 				// If the char is NOT escaping anything...
@@ -244,7 +244,7 @@ namespace KFF
 				Tag newTag = Tag();
 				if( payload.Has( newTag.name ) )
 				{
-					throw new KFFParseException( "Found duplicated Tag '" + newTag.name + "' (" + LineData.Calculate( this.s, begin ) + ")." );
+					throw new KFFParseException( "Found duplicated Tag '" + newTag.name + "' (" + TextFileData.Calculate( this.fileName, this.s, begin ) + ")." );
 				}
 				payload.Set( newTag );
 			}
@@ -282,7 +282,7 @@ namespace KFF
 			// If the list has a type assigned and the payload is not of this type.
 			if( payload.listType != DataType.EmptyList && p.type != payload.listType )
 			{
-				throw new KFFParseException( "Found mismatched payload '" + p.type.ToString() + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+				throw new KFFParseException( "Found mismatched payload '" + p.type.ToString() + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 			}
 			payload.Add( p );
 
@@ -304,7 +304,7 @@ namespace KFF
 				return payload;
 			}
 
-			throw new KFFParseException( "Expected to find '" + Syntax.LIST_ELEMENT_SEPARATOR + "' or '" + Syntax.LIST_CLOSING + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, pos ) + ")." );
+			throw new KFFParseException( "Expected to find '" + Syntax.LIST_ELEMENT_SEPARATOR + "' or '" + Syntax.LIST_CLOSING + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, pos ) + ")." );
 		}
 
 		private PayloadDecimal NumberNaN()
@@ -315,7 +315,7 @@ namespace KFF
 				// If any of the chars is not valid, throw an exception.
 				if( currentChar != Syntax.TOKEN_NOT_A_NUMBER[i] )
 				{
-					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_NOT_A_NUMBER[i] + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_NOT_A_NUMBER[i] + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 
@@ -334,7 +334,7 @@ namespace KFF
 				// If any of the chars is not valid, throw an exception.
 				if( currentChar != Syntax.TOKEN_INFINITY[i] )
 				{
-					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_INFINITY[i] + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find '" + Syntax.TOKEN_INFINITY[i] + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 
@@ -378,7 +378,7 @@ namespace KFF
 				}
 				else
 				{
-					throw new KFFParseException( "Expected to find [0-9], but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find [0-9], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 
@@ -409,7 +409,7 @@ namespace KFF
 				}
 				else
 				{
-					throw new KFFParseException( "Expected to find [0-9], but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find [0-9], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 
@@ -500,11 +500,11 @@ namespace KFF
 				// Throw an exception.
 				if( negativeSignFlag )
 				{
-					throw new KFFParseException( "Expected to find [0-9], but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+					throw new KFFParseException( "Expected to find [0-9], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 				}
 			}
 			
-			throw new KFFParseException( "Unexpected char. '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+			throw new KFFParseException( "Unexpected char. '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 		}
 
 		private Tag Tag()
@@ -516,7 +516,7 @@ namespace KFF
 
 			if( this.currentChar != Syntax.NAME_PAYLOAD_SEPARATOR )
 			{
-				throw new KFFParseException( "Expected to find '" + Syntax.NAME_PAYLOAD_SEPARATOR + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+				throw new KFFParseException( "Expected to find '" + Syntax.NAME_PAYLOAD_SEPARATOR + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 			}
 			pos++; // '='
 
@@ -528,7 +528,7 @@ namespace KFF
 
 			if( this.currentChar != Syntax.TAG_END )
 			{
-				throw new KFFParseException( "Expected to find '" + Syntax.TAG_END + "', but found '" + currentChar + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+				throw new KFFParseException( "Expected to find '" + Syntax.TAG_END + "', but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 			}
 			pos++; // ';'
 
@@ -558,14 +558,14 @@ namespace KFF
 			{
 				return new TagList( name, (PayloadList)payload );
 			}
-			throw new KFFParseException("Invalid payload type '" + payload.type.ToString() + "' (" + LineData.Calculate( this.s, this.pos ) + ")." );
+			throw new KFFParseException("Invalid payload type '" + payload.type.ToString() + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 		}
 
 		private PayloadInteger TryParseInteger( string numberText )
 		{
 			if( !long.TryParse( numberText, Syntax.numberStyle, Syntax.numberFormat, out long num ) )
 			{
-				throw new KFFParseException( "The value '" + numberText + "' can't be represented by a Integer datatype ('long') (" + LineData.Calculate( this.s, this.pos ) + ")." );
+				throw new KFFParseException( "The value '" + numberText + "' can't be represented by a Integer datatype ('long') (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 			}
 			return new PayloadInteger( num );
 		}
@@ -574,7 +574,7 @@ namespace KFF
 		{
 			if( !double.TryParse( numberText, Syntax.numberStyle, Syntax.numberFormat, out double num ) )
 			{
-				throw new KFFParseException( "The value '" + numberText + "' can't be represented by a Decimal datatype ('double') (" + LineData.Calculate( this.s, this.pos ) + ")." );
+				throw new KFFParseException( "The value '" + numberText + "' can't be represented by a Decimal datatype ('double') (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
 			}
 			return new PayloadDecimal( num );
 		}
@@ -582,8 +582,9 @@ namespace KFF
 		/// <summary>
 		/// Parses a string representation into a KFF file. Throws an exception if the string is malformed.
 		/// </summary>
+		/// <param name="fileName">The name of the file that will be parsed.</param>
 		/// <param name="s">The string to parse.</param>
-		public KFFFile Parse( string s )
+		public KFFFile Parse( string fileName, string s )
 		{
 			if( s == null )
 			{
@@ -591,13 +592,13 @@ namespace KFF
 			}
 			if( s == "" )
 			{
-				return new KFFFile();
+				return new KFFFile( fileName );
 			}
 
 			this.s = s;
 			this.pos = 0;
 
-			KFFFile f = new KFFFile();
+			KFFFile f = new KFFFile( fileName );
 			
 			SkipWhiteSpacesAndComments();
 
@@ -607,7 +608,7 @@ namespace KFF
 				Tag newTag = Tag();
 				if( f.Has( newTag.name ) )
 				{
-					throw new KFFParseException( "Found duplicated Tag '" + newTag.name + "' (" + LineData.Calculate( this.s, begin ) + ")." );
+					throw new KFFParseException( "Found duplicated Tag '" + newTag.name + "' (" + TextFileData.Calculate( this.fileName, this.s, begin ) + ")." );
 				}
 				f.Set( newTag );
 			}

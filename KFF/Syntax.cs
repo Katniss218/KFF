@@ -9,6 +9,26 @@ namespace KFF
 	public static class Syntax
 	{
 		/// <summary>
+		/// The char used to separate path segments in the string representation.
+		/// </summary>
+		public const char PATH_SEGMENT_SEPARATOR = '.';
+
+		/// <summary>
+		/// The char used to indicate a path segment going backward, instead of usual forward.
+		/// </summary>
+		public const char PATH_BACKWARD = '<';
+
+		/// <summary>
+		/// The char used to indicate beginning of the placeholder index.
+		/// </summary>
+		public const char PATH_PLACEHOLDER_OPENING = '{';
+
+		/// <summary>
+		/// The char used to indicate ending of the placeholder index.
+		/// </summary>
+		public const char PATH_PLACEHOLDER_CLOSING = '}';
+
+		/// <summary>
 		/// The "Name/Payload Separator" token.
 		/// </summary>
 		public const char NAME_PAYLOAD_SEPARATOR = '=';
@@ -37,9 +57,12 @@ namespace KFF
 		/// The "Escape Char" token.
 		/// </summary>
 		public const char ESCAPE_CHAR = '\\'; // - '\'
+		
+		/// <summary>
+		/// The "Comment" token.
+		/// </summary>
+		public const string COMMENT = "//";
 
-		public const char COMMENT_CHAR = '/'; // two of those make a comment beginning
-		public const string COMMENT_TOKEN = "//";
 		/// <summary>
 		/// The "Class Opening" token.
 		/// </summary>
@@ -64,16 +87,6 @@ namespace KFF
 		/// The "List Element Separator" token.
 		/// </summary>
 		public const char LIST_ELEMENT_SEPARATOR = ',';
-
-		/// <summary>
-		/// The char used to separate path segments in the string representation.
-		/// </summary>
-		public const char PATH_SEGMENT_SEPARATOR = '.';
-		
-		/// <summary>
-		/// The char used to indicate a path segment going backward, instead of usual forward.
-		/// </summary>
-		public const char PATH_BACKWARD = '<';
 
 		/// <summary>
 		/// The keyword for 'true' Boolean value.

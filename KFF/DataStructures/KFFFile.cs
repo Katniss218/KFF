@@ -10,6 +10,11 @@ namespace KFF
 	public class KFFFile : Object, IClass
 	{
 		/// <summary>
+		/// The name of the file. Displayed when exceptions are thrown.
+		/// </summary>
+		public string fileName { get; set; }
+		
+		/// <summary>
 		/// The tags contained directly in the file (nest = 0).
 		/// </summary>
 		public PayloadClass tags { get; set; }
@@ -63,8 +68,9 @@ namespace KFF
 		/// <summary>
 		/// Creates a new KFF file with the specified tags inside.
 		/// </summary>
-		public KFFFile()
+		public KFFFile( string fileName )
 		{
+			this.fileName = fileName;
 			this.tags = new PayloadClass();
 			this.tags.EmbedIn( this );
 		}
@@ -156,7 +162,7 @@ namespace KFF
 				{
 					if( currentClass == null )
 					{
-						throw new KFFException( "Invalid path, can't find Tag with the name '" + path[i].name + "'." );
+						throw new KFFException( "Invalid path, can't find Tag with the name '" + path[i].name + "' (" + this.fileName + ")." );
 					}
 					if( currentClass.TryGet( path[i].name, out Tag t ) )
 					{
@@ -165,14 +171,14 @@ namespace KFF
 					}
 					else
 					{
-						throw new KFFException( "Can't find Tag with the name '" + path[i].name + "' inside of the class." );
+						throw new KFFException( "Can't find Tag with the name '" + path[i].name + "' inside of the class (" + this.fileName + ")." );
 					}
 				}
 				else // destination = payload
 				{
 					if( currentList == null )
 					{
-						throw new KFFException( "Invalid path, can't find Payload with the index '" + i + "'." );
+						throw new KFFException( "Invalid path, can't find Payload with the index '" + i + "' (" + this.fileName + ")." );
 					}
 					if( currentList.TryGet( path[i].index, out Payload t ) )
 					{
@@ -181,7 +187,7 @@ namespace KFF
 					}
 					else
 					{
-						throw new KFFException( "Can't find Payload with the index '" + i + "' inside of the list." );
+						throw new KFFException( "Can't find Payload with the index '" + i + "' inside of the list (" + this.fileName + ")." );
 					}
 				}
 			}
@@ -191,7 +197,7 @@ namespace KFF
 				{
 					return t;
 				}
-				throw new KFFException( "Can't find Tag with the name '" + path[lastSegmentIndex].name + "' inside of the class." );
+				throw new KFFException( "Can't find Tag with the name '" + path[lastSegmentIndex].name + "' inside of the class (" + this.fileName + ")." );
 			}
 			if( currentList != null )
 			{
@@ -199,9 +205,9 @@ namespace KFF
 				{
 					return p;
 				}
-				throw new KFFException( "Can't find Payload with the index '" + (lastSegmentIndex) + "' inside of the list." );
+				throw new KFFException( "Can't find Payload with the index '" + (lastSegmentIndex) + "' inside of the list (" + this.fileName + ")." );
 			}
-			throw new KFFException( "Error, the specified path is invalid or the Tag/Payload in't present." );
+			throw new KFFException( "Error, the specified path is invalid or the Tag/Payload in't present (" + this.fileName + ")." );
 		}
 	}
 }

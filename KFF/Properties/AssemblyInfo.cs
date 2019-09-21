@@ -18,11 +18,13 @@ using System.Runtime.InteropServices;
 // Następujący identyfikator GUID jest identyfikatorem biblioteki typów w przypadku udostępnienia tego projektu w modelu COM
 [assembly: Guid("58910457-ea71-4c83-8c1d-e0fa2d5806e1")]
 
-[assembly: AssemblyVersion( "1.0.5" )]
-[assembly: AssemblyFileVersion("1.0.5")] // wersja produktu
+[assembly: AssemblyVersion( "1.1" )]
+[assembly: AssemblyFileVersion("1.1")] // wersja produktu
 [assembly: NeutralResourcesLanguage( "" )]
 
 /*
+ * 1.0   - Initial version.
+ * 
  * 1.0.1 - Added ability to check amount of elements in the object at specified path.
  * 
  * 
@@ -36,5 +38,7 @@ using System.Runtime.InteropServices;
  * 
  * 1.0.5 - Changed the analysis operation to use a new class structure called AnalysysData.
  * 
+ * 1.1   - Added placeholders to paths.
+ *       - Added filename support for easy feedback on malformed files.
  * 
  */
