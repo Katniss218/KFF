@@ -1,6 +1,8 @@
 ﻿using KFF.DataStructures;
+using System;
 using System.IO;
 using System.Text;
+using Object = KFF.DataStructures.Object;
 
 namespace KFF
 {
@@ -79,7 +81,7 @@ namespace KFF
 		/// </para>
 		/// </summary>
 		public Object scopeRoot { get; set; }
-		
+
 		/// <summary>
 		/// Contains the file that the serializer operates on. The scope is reset to this file upon calling the 'ResetScope()' method (Read Only).
 		/// </summary>
@@ -97,6 +99,9 @@ namespace KFF
 			this.scopeRoot = file;
 		}
 
+#warning TODO! - make the DeserializeArray actually allocate the array to the required child count.
+#warning TODO! - make the KFFSerializer show the path & file name on exception.
+
 		/// <summary>
 		/// Wrapper method for creating a new KFFSerializer with the contents of a text file.
 		/// </summary>
@@ -104,7 +109,15 @@ namespace KFF
 		/// <param name="encoding">The encoding of the text file.</param>
 		public static KFFSerializer ReadFromFile( string path, Encoding encoding )
 		{
-			string contents = File.ReadAllText( path );
+			string contents = null;
+			try
+			{
+				contents = File.ReadAllText( path );
+			}
+			catch( Exception e )
+			{
+				throw new KFFException( "Error occurred when trying to open file '" + path + "'.", e );
+			}
 
 			KFFParser parser = new KFFParser();
 			KFFFile kff = parser.Parse( path, contents );
@@ -121,9 +134,17 @@ namespace KFF
 		{
 			KFFParser parser = new KFFParser();
 
-			string kff = parser.ToString( this.file );
+			// TODO - parser settings.
 
-			File.WriteAllText( path, kff, encoding );
+			string kff = parser.ToString( this.file );
+			try
+			{
+				File.WriteAllText( path, kff, encoding );
+			}
+			catch( Exception e )
+			{
+				throw new KFFException( "Error occurred when trying to save file '" + path + "'.", e );
+			}
 		}
 
 		/// <summary>
@@ -244,7 +265,7 @@ namespace KFF
 				return new AnalysisData( null );
 			}
 		}
-		
+
 
 
 
@@ -656,7 +677,7 @@ namespace KFF
 		/// <param name="path">The path to write the Tag at (points to the container).</param>
 		/// <param name="name">The name of the new Tag.</param>
 		/// <param name="serializableObj">The value to serialize.</param>
-		public void Serialize<T>( Path path, string name, T serializableObj ) where T : IKFFSerializable
+		public void Serialize<T>( Path path, string name, T serializableObj ) where T : IKFFSerializable, new()
 		{
 			// Be sure to set the scope to the 'serializedClass'!
 			// save the scope locally, so we can put the file, after serialization, still being relative to it.
@@ -676,7 +697,7 @@ namespace KFF
 		/// <param name="path">The path to write the TagList at (points to the container).</param>
 		/// <param name="containerName">The name of the TagList containing the values.</param>
 		/// <param name="serializableObjs">The values to serialize.</param>
-		public void SerializeArray<T>( Path path, string containerName, T[] serializableObjs ) where T : IKFFSerializable
+		public void SerializeArray<T>( Path path, string containerName, T[] serializableObjs ) where T : IKFFSerializable, new()
 		{
 			// Be sure to set the scope to the 'serializedClass'!
 			// save the scope locally, so we can put the file, after serialization, still being relative to it.
@@ -1404,18 +1425,19 @@ namespace KFF
 			}
 			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
 		}
-		
-		public void Deserialize<T>( Path path, T serializableObj ) where T : IKFFSerializable
+
+		public void Deserialize<T>( Path path, T serializableObj ) where T : IKFFSerializable, new()
 		{
 			// save the scope locally and modify the real one.
 			Object beginScope = this.scopeRoot;
 			this.MoveScope( path, true );
+			serializableObj = new T();
 			serializableObj.DeserializeKFF( this );
 			// revert the scope to the locally-saved one.
 			this.scopeRoot = beginScope;
 		}
 
-		public void DeserializeArray<T>( Path path, T[] serializableObj ) where T : IKFFSerializable
+		public void DeserializeArray<T>( Path path, T[] serializableObj ) where T : IKFFSerializable, new()
 		{
 			// save the scope locally and modify the real one.
 			Object beginScope = this.scopeRoot;
@@ -1424,10 +1446,7 @@ namespace KFF
 			{
 				throw new KFFReadWriteException( "The object '" + list.GetType().ToString() + "' is not a list." );
 			}
-			if( ((IList)list).count < serializableObj.Length )
-			{
-				throw new KFFReadWriteException( "The list '" + list.GetType().ToString() + "' has less than " + serializableObj.Length + " elements inside." );
-			}
+			serializableObj = new T[((IList)list).count];
 			for( int i = 0; i < serializableObj.Length; i++ )
 			{
 				this.MoveScope( i.ToString( Syntax.numberFormat ), true ); // move scope to the i'th element of the list.
