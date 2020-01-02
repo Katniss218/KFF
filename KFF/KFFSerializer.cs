@@ -586,6 +586,10 @@ namespace KFF
 		/// <param name="value">The value to write.</param>
 		public void WriteString( Path path, string name, string value ) // writes a tag named 'name' to the class at path 'path'.
 		{
+			if( value == null )
+			{
+				throw new ArgumentNullException( "Can't write a null value." );
+			}
 			this.__WriteTag( path, false, new TagString( name, value ) );
 		}
 
@@ -597,9 +601,17 @@ namespace KFF
 		/// <param name="values">The values to write.</param>
 		public void WriteStringArray( Path path, string containerName, string[] values )
 		{
+			if( values == null )
+			{
+				throw new ArgumentNullException( "'values' can't be null." );
+			}
 			TagList container = new TagList( containerName );
 			for( int i = 0; i < values.Length; i++ )
 			{
+				if( values[i] == null )
+				{
+					throw new ArgumentNullException( "Can't write a null value." );
+				}
 				container.Add( new PayloadString( values[i] ) );
 			}
 			this.__WriteTag( path, false, container );

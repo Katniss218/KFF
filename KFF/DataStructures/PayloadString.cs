@@ -49,7 +49,7 @@ namespace KFF.DataStructures
 		/// <param name="value">The value to hold.</param>
 		public PayloadString( string value )
 		{
-			this.value = value;
+			this.value = value ?? throw new KFFException( "String payload must contain a non-null value." );
 		}
 
 
@@ -62,6 +62,7 @@ namespace KFF.DataStructures
 		{
 			return other.value;
 		}
+
 		/// <summary>
 		/// Convert a string data type into a payload of type String.
 		/// </summary>
@@ -70,6 +71,7 @@ namespace KFF.DataStructures
 		{
 			return new PayloadString( other );
 		}
+
 		public static bool operator ==( PayloadString left, PayloadString right )
 		{
 			return left.value.Equals( right.value );
