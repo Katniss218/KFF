@@ -98,8 +98,7 @@ namespace KFF
 			this.file = file; // ... here, ...
 			this.scopeRoot = file;
 		}
-
-#warning TODO! - make the DeserializeArray actually allocate the array to the required child count.
+		
 #warning TODO! - make the KFFSerializer show the path & file name on exception.
 
 		/// <summary>
@@ -1461,6 +1460,7 @@ namespace KFF
 			serializableObj = new T[((IList)list).count];
 			for( int i = 0; i < serializableObj.Length; i++ )
 			{
+				serializableObj[i] = new T();
 				this.MoveScope( i.ToString( Syntax.numberFormat ), true ); // move scope to the i'th element of the list.
 				serializableObj[i].DeserializeKFF( this );
 				this.scopeRoot = list; // move the scope back to the list.
