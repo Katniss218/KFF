@@ -1,5 +1,4 @@
-﻿
-namespace KFF.DataStructures
+﻿namespace KFF.DataStructures
 {
 	/// <summary>
 	/// Represents a KFF data type.
@@ -15,6 +14,8 @@ namespace KFF.DataStructures
 		/// Special data type, only used to indicate that a List is empty.
 		/// </summary>
 		EmptyList = 0,
+
+		// - - - -
 
 		/// <summary>
 		/// Boolean data type, can hold a boolean (true/false).

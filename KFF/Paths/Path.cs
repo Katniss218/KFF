@@ -11,6 +11,8 @@ namespace KFF
 	/// </summary>
 	public struct Path
 	{
+		readonly PathSegment[] segments;
+
 		internal PathSegment this[int nest]
 		{
 			get
@@ -19,7 +21,7 @@ namespace KFF
 			}
 		}
 
-		internal readonly PathSegment[] segments;
+
 
 		/// <summary>
 		/// Contains the type of object that the path points to (Tag/Payload) (Read only).
@@ -88,6 +90,7 @@ namespace KFF
 			}
 		}
 
+
 		/// <summary>
 		/// Returns the string representation of this path.
 		/// </summary>
@@ -101,7 +104,7 @@ namespace KFF
 
 			// Otherwise, loop through all of the segments and join them with the KFFSyntax.PATH_SEGMENT_SEPARATOR in between.
 			StringBuilder sb = new StringBuilder();
-			
+
 			sb.Append( this.segments[0].name );
 			for( int i = 1; i < this.segments.Length; i++ )
 			{
@@ -151,6 +154,5 @@ namespace KFF
 			}
 			return left.destination != right.destination;
 		}
-
 	}
 }

@@ -1,0 +1,120 @@
+// comment can be placed where the whitespaces can.
+Abc = true;
+A = 
+{
+	Health = 50;
+	Id = "abcd";
+	Name = "Abcd";
+	Num = 
+	{
+		
+	};
+	Position = 
+	[
+		3.178,
+		8.512,
+		-4.001
+	];
+};
+e = 5.5;// comment after tag
+
+----
+N_m0 = true;
+N_m1 = false;
+N_m2 = 10;
+N_m3 = 0;
+N_m4 = -10;
+N_m5 = 10.5;
+N_m6 = 10.0;
+N_m7 = 0.0;
+N_m8 = -10.0;
+N_m9 = -10.5;
+N_m10 = "AABB";
+N_m11 = "AA\"BB";
+N_m12 = "AA\\BB";
+N_m13 = {
+
+};
+N_m14 = [
+
+];
+N_m15 = [
+	true,
+	false
+];
+N_m15 = [
+	10,
+	0,
+	-10
+];
+N_m16 = [
+	10.5,
+	10.0,
+	0.0,
+	-10.0,
+	-10.5
+];
+N_m17 = [
+	"AABB",
+	"AA\"BB",
+	"AA\\BB"
+];
+N_m18 = [
+	{
+
+	},
+	{
+
+	}
+];
+
+N_m19 = {
+	N_m0 = true;
+	N_m1 = false;
+	N_m2 = 10;
+	N_m3 = 0;
+	N_m4 = -10;
+	N_m5 = 10.5;
+	N_m6 = 10.0;
+	N_m7 = 0.0;
+	N_m8 = -10.0;
+	N_m9 = -10.5;
+	N_m10 = "AABB";
+	N_m11 = "AA\"BB";
+	N_m12 = "AA\\BB";
+	N_m13 = {
+
+	};
+	N_m14 = [
+
+	];
+	N_m15 = [
+		true,
+		false
+	];
+	N_m15 = [
+		10,
+		0,
+		-10
+	];
+	N_m16 = [
+		10.5,
+		10.0,
+		0.0,
+		-10.0,
+		-10.5
+	];
+	N_m17 = [
+		"AABB",
+		"AA\"BB",
+		"AA\\BB"
+	];
+	N_m18 = [
+		{
+
+		},
+		{
+
+		}
+	];
+};

@@ -84,6 +84,8 @@ namespace KFF.DataStructures
 					return true;
 			return false;
 		}
+
+
 		/// <summary>
 		/// Checks if the class contains a tag with the specified name.
 		/// </summary>
@@ -119,7 +121,11 @@ namespace KFF.DataStructures
 			t = null;
 			return false;
 		}
-
+		
+		/// <summary>
+		/// Returns the index of the tag with the specified name.
+		/// </summary>
+		/// <param name="name">The name of the tag to search for.</param>
 		public int IndexOf( string name )
 		{
 			for( int i = 0; i < value.Count; i++ )

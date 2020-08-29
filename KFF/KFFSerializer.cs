@@ -15,7 +15,7 @@ namespace KFF
 	public sealed class KFFSerializer
 	{
 		/// <summary>
-		/// Contains the results of the analysis operation.
+		/// Contains the resulting data about the analysis operation.
 		/// </summary>
 		public sealed class AnalysisData
 		{
@@ -43,6 +43,7 @@ namespace KFF
 			/// </summary>
 			public bool isPayload { get; private set; }
 
+
 			internal AnalysisData( Object obj )
 			{
 				if( obj == null )
@@ -51,28 +52,31 @@ namespace KFF
 					this.isTag = false;
 					this.isPayload = false;
 					this.childCount = 0;
+
+					return;
+				}
+
+
+				this.isSuccess = true;
+				this.isTag = obj.isTag;
+				this.isPayload = obj.isPayload;
+
+				if( obj.type == DataType.Class )
+				{
+					this.childCount = ((IClass)obj).count;
+				}
+				else if( obj.type == DataType.List )
+				{
+					this.childCount = ((IList)obj).count;
 				}
 				else
 				{
-					this.isSuccess = true;
-					this.isTag = obj.isTag;
-					this.isPayload = obj.isPayload;
-
-					if( obj.type == DataType.Class )
-					{
-						this.childCount = ((IClass)obj).count;
-					}
-					else if( obj.type == DataType.List )
-					{
-						this.childCount = ((IList)obj).count;
-					}
-					else
-					{
-						this.childCount = 0;
-					}
+					this.childCount = 0;
 				}
 			}
 		}
+
+
 		/// <summary>
 		/// Contains the root object of the current scope. Either a tag or payload. You shouldn't mess with this, unless you know what you are doing.
 		/// <para>
@@ -98,8 +102,6 @@ namespace KFF
 			this.file = file; // ... here, ...
 			this.scopeRoot = file;
 		}
-		
-#warning TODO! - make the KFFSerializer show the path & file name on exception.
 
 		/// <summary>
 		/// Wrapper method for creating a new KFFSerializer with the contents of a text file.
@@ -133,7 +135,7 @@ namespace KFF
 		{
 			KFFParser parser = new KFFParser();
 
-			// TODO - parser settings.
+#warning TODO - parser settings (formatting)
 
 			string kff = parser.ToString( this.file );
 			try
@@ -156,14 +158,14 @@ namespace KFF
 		}
 
 		/// <summary>
-		/// Moves the scope to the object at the end of the specified path, and returns that object. If the <paramref name="keepItThere"/> is set to true, the scope will be set to the object at end of the path.
+		/// Moves the scope to the object at the end of the specified path, and returns that object. If the <paramref name="dontReset"/> is set to true, the scope will be set to the object at end of the path.
 		/// <para>
 		/// Moving scope works relative to the scopeRoot. So if you set it to an object outside of the file, you can freely read/write from another data tree.
 		/// </para>
 		/// </summary>
 		/// <param name="path">The path along which to move the scope.</param>
-		/// <param name="keepItThere">If set to true, the scope will be set to the object at end of the path.</param>
-		public Object MoveScope( Path path, bool keepItThere )
+		/// <param name="dontReset">If set to true, the scope will be set to the object at end of the path.</param>
+		public Object MoveScope( Path path, bool dontReset )
 		{
 			// Throws an Exception, if the scope can't be moved all the way, to the end of the path.
 			// This can be used to speed up searching, by removing unwanted objects from the search.
@@ -188,7 +190,7 @@ namespace KFF
 					{
 						if( path[i].destination == ObjectType.Payload )
 						{
-							throw new KFFReadWriteException( "Can't get a Payload inside of a class ('" + path[i].name + "')." );
+							throw new KFFReadWriteException( "Can't get a Payload inside of a class ('" + path[i].name + "') (" + path.ToString() + ")." );
 						}
 						localScopeRoot = ((IClass)localScopeRoot).Get( path[i].name );
 						continue;
@@ -198,7 +200,7 @@ namespace KFF
 					{
 						if( path[i].destination == ObjectType.Tag )
 						{
-							throw new KFFReadWriteException( "Can't get a Tag inside of a list ('" + path[i].name + "')." );
+							throw new KFFReadWriteException( "Can't get a Tag inside of a list ('" + path[i].name + "') (" + path.ToString() + ")." );
 						}
 						localScopeRoot = ((IList)localScopeRoot).Get( path[i].index );
 						continue;
@@ -206,7 +208,7 @@ namespace KFF
 					// If the element is not a class not a list, and it is in the middle of the path (more elements nested deeper), throw an exception.
 					if( i < path.nestLevel - 1 )
 					{
-						throw new KFFReadWriteException( "The file contains non-class/list element '" + path[i].name + "' in the middle of the path." );
+						throw new KFFReadWriteException( "The file contains non-class/list element '" + path[i].name + "' in the middle of the path. (" + path.ToString() + ")" );
 					}
 				}
 				if( path[i].direction == PathDirection.Backward )
@@ -224,7 +226,7 @@ namespace KFF
 					// if the scope root is payload which is a part of a tag, move back to that tag.
 				}
 			}
-			if( keepItThere )
+			if( dontReset )
 			{
 				this.scopeRoot = localScopeRoot; // if the function doesn't local scope, move the "real" root to where the path points and leave it there.
 			}
@@ -280,7 +282,6 @@ namespace KFF
 
 
 
-		// Writes a tag at the specified path.
 		private void __WriteTag( Path path, bool keepItThere, Tag obj )
 		{
 			Object result = this.MoveScope( path, keepItThere );
@@ -289,10 +290,9 @@ namespace KFF
 				((IClass)result).Set( obj );
 				return;
 			}
-			throw new KFFReadWriteException( "Can't set Tag '" + obj.name + "' to the non-class object '" + result.GetType().ToString() + "'." );
+			throw new KFFReadWriteException( "Can't set Tag '" + obj.name + "' to the non-class object '" + result.GetType().ToString() + "' (" + path.ToString() + ")." );
 		}
 
-		// Writes a payload at the specified path.
 		private void __AppendPayload( Path path, bool keepItThere, Payload obj )
 		{
 			Object result = this.MoveScope( path, keepItThere );
@@ -301,7 +301,7 @@ namespace KFF
 				((IList)result).Add( obj );
 				return;
 			}
-			throw new KFFReadWriteException( "Can't add Payload '" + obj + "' to the non-list object '" + result.GetType().ToString() + "'." );
+			throw new KFFReadWriteException( "Can't add Payload '" + obj + "' to the non-list object '" + result.GetType().ToString() + "' (" + path.ToString() + ")." );
 		}
 
 
@@ -742,7 +742,7 @@ namespace KFF
 
 
 
-		private bool __ReadBoolean( Object obj )
+		private bool __ReadBoolean( Object obj, Path errPath )
 		{
 			if( obj.isPayload )
 			{
@@ -752,10 +752,10 @@ namespace KFF
 			{
 				return ((TagBoolean)obj).payload;
 			}
-			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." );
+			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." ); // shouldn't ever happen.
 		}
 
-		private long __ReadInteger( Object obj )
+		private long __ReadInteger( Object obj, Path errPath )
 		{
 			if( obj.isPayload )
 			{
@@ -765,10 +765,10 @@ namespace KFF
 			{
 				return ((TagInteger)obj).payload;
 			}
-			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." );
+			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." ); // shouldn't ever happen.
 		}
 
-		private double __ReadDecimal( Object obj )
+		private double __ReadDecimal( Object obj, Path errPath )
 		{
 			if( obj.isPayload )
 			{
@@ -778,10 +778,10 @@ namespace KFF
 			{
 				return ((TagDecimal)obj).payload;
 			}
-			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." );
+			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." ); // shouldn't ever happen.
 		}
 
-		private string __ReadString( Object obj )
+		private string __ReadString( Object obj, Path errPath )
 		{
 			if( obj.isPayload )
 			{
@@ -791,8 +791,9 @@ namespace KFF
 			{
 				return ((TagString)obj).payload;
 			}
-			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." );
+			throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." ); // shouldn't ever happen.
 		}
+
 
 
 		public bool ReadBool( Path path )
@@ -800,9 +801,9 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Boolean )
 			{
-				return this.__ReadBoolean( obj );
+				return this.__ReadBoolean( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'bool'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'bool' (" + path.ToString() + ")." );
 		}
 
 		public bool[] ReadBoolArray( Path path )
@@ -824,9 +825,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Boolean'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public sbyte ReadSByte( Path path )
@@ -834,13 +835,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (sbyte)this.__ReadInteger( obj );
+				return (sbyte)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (sbyte)this.__ReadDecimal( obj );
+				return (sbyte)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'sbyte'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'sbyte' (" + path.ToString() + ")." );
 		}
 
 		public sbyte[] ReadSByteArray( Path path )
@@ -871,9 +872,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public byte ReadByte( Path path )
@@ -881,13 +882,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (byte)this.__ReadInteger( obj );
+				return (byte)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (byte)this.__ReadDecimal( obj );
+				return (byte)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'byte'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'byte' (" + path.ToString() + ")." );
 		}
 
 		public byte[] ReadByteArray( Path path )
@@ -918,9 +919,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public short ReadShort( Path path )
@@ -928,13 +929,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (short)this.__ReadInteger( obj );
+				return (short)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (short)this.__ReadDecimal( obj );
+				return (short)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'short'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'short' (" + path.ToString() + ")." );
 		}
 
 		public short[] ReadShortArray( Path path )
@@ -965,9 +966,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public ushort ReadUShort( Path path )
@@ -975,13 +976,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (ushort)this.__ReadInteger( obj );
+				return (ushort)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (ushort)this.__ReadDecimal( obj );
+				return (ushort)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'ushort'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'ushort' (" + path.ToString() + ")." );
 		}
 
 		public ushort[] ReadUShortArray( Path path )
@@ -1012,9 +1013,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public int ReadInt( Path path )
@@ -1022,13 +1023,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (int)this.__ReadInteger( obj );
+				return (int)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (int)this.__ReadDecimal( obj );
+				return (int)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'int'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'int' (" + path.ToString() + ")." );
 		}
 
 		public int[] ReadIntArray( Path path )
@@ -1059,9 +1060,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public uint ReadUInt( Path path )
@@ -1069,13 +1070,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (uint)this.__ReadInteger( obj );
+				return (uint)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (uint)this.__ReadDecimal( obj );
+				return (uint)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'uint'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'uint' (" + path.ToString() + ")." );
 		}
 
 		public uint[] ReadUIntArray( Path path )
@@ -1106,9 +1107,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public long ReadLong( Path path )
@@ -1116,13 +1117,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (long)this.__ReadInteger( obj );
+				return (long)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (long)this.__ReadDecimal( obj );
+				return (long)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'long'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'long' (" + path.ToString() + ")." );
 		}
 
 		public long[] ReadLongArray( Path path )
@@ -1153,9 +1154,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public ulong ReadULong( Path path )
@@ -1163,13 +1164,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (ulong)this.__ReadInteger( obj );
+				return (ulong)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (ulong)this.__ReadDecimal( obj );
+				return (ulong)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'ulong'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'ulong' (" + path.ToString() + ")." );
 		}
 
 		public ulong[] ReadULongArray( Path path )
@@ -1200,9 +1201,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public float ReadFloat( Path path )
@@ -1210,13 +1211,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (float)this.__ReadInteger( obj );
+				return (float)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (float)this.__ReadDecimal( obj );
+				return (float)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'float'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'float' (" + path.ToString() + ")." );
 		}
 
 		public float[] ReadFloatArray( Path path )
@@ -1247,9 +1248,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public double ReadDouble( Path path )
@@ -1257,13 +1258,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (double)this.__ReadInteger( obj );
+				return (double)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (double)this.__ReadDecimal( obj );
+				return (double)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'double'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'double' (" + path.ToString() + ")." );
 		}
 
 		public double[] ReadDoubleArray( Path path )
@@ -1294,9 +1295,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public char ReadChar( Path path )
@@ -1309,7 +1310,7 @@ namespace KFF
 					string s = (string)((PayloadString)obj);
 					if( string.IsNullOrEmpty( s ) || s.Length != 1 )
 					{
-						throw new KFFReadWriteException( "Can't convert string '" + s + "' into a char." );
+						throw new KFFReadWriteException( "Can't convert string '" + s + "' into a char (" + path.ToString() + ")." );
 					}
 					return s[0];
 				}
@@ -1318,13 +1319,13 @@ namespace KFF
 					string s = (string)((TagString)obj).payload;
 					if( string.IsNullOrEmpty( s ) || s.Length != 1 )
 					{
-						throw new KFFReadWriteException( "Can't convert string '" + s + "' into a char." );
+						throw new KFFReadWriteException( "Can't convert string '" + s + "' into a char (" + path.ToString() + ")." );
 					}
 					return s[0];
 				}
-				throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead." );
+				throw new KFFReadWriteException( "Expected to find a Tag or a Payload, '" + obj.GetType().ToString() + "' was found instead (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'string'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'string' (" + path.ToString() + ")." );
 		}
 
 		public char[] ReadCharArray( Path path ) // converts array of single-character strings into array of char values.
@@ -1345,15 +1346,15 @@ namespace KFF
 						string s = (string)((PayloadString)obj);
 						if( string.IsNullOrEmpty( s ) || s.Length != 1 )
 						{
-							throw new KFFReadWriteException( "Can't convert string '" + s + "' into a char." );
+							throw new KFFReadWriteException( "Can't convert string '" + s + "' into a char (" + path.ToString() + ")." );
 						}
 						ret[i] = s[0];
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'Integer' or 'Decimal'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public string ReadString( Path path )
@@ -1361,9 +1362,9 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.String )
 			{
-				return this.__ReadString( obj );
+				return this.__ReadString( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'string'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'string' (" + path.ToString() + ")." );
 		}
 
 		public string[] ReadStringArray( Path path )
@@ -1385,9 +1386,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The List found is not a list of type 'String'." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public decimal ReadDecimal( Path path )
@@ -1395,13 +1396,13 @@ namespace KFF
 			Object obj = this.MoveScope( path, false );
 			if( obj.type == DataType.Integer )
 			{
-				return (decimal)this.__ReadInteger( obj );
+				return (decimal)this.__ReadInteger( obj, path );
 			}
 			if( obj.type == DataType.Decimal )
 			{
-				return (decimal)this.__ReadDecimal( obj );
+				return (decimal)this.__ReadDecimal( obj, path );
 			}
-			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'decimal'." );
+			throw new KFFReadWriteException( "The object '" + obj.type.ToString() + "' can't be converted into 'decimal' (" + path.ToString() + ")." );
 		}
 
 		public decimal[] ReadDecimalArray( Path path )
@@ -1432,9 +1433,9 @@ namespace KFF
 					}
 					return ret;
 				}
-				throw new KFFReadWriteException( "The list at the end of the path is not a list of numbers." );
+				throw new KFFReadWriteException( "Invalid list type (" + path.ToString() + ")." );
 			}
-			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead." );
+			throw new KFFReadWriteException( "Expected to find a List, found '" + obj.GetType().ToString() + "' instead (" + path.ToString() + ")." );
 		}
 
 		public void Deserialize<T>( Path path, T serializableObj ) where T : IKFFSerializable, new()
@@ -1455,7 +1456,7 @@ namespace KFF
 			Object list = this.MoveScope( path, true ); // save the scope of the list.
 			if( list.type != DataType.List )
 			{
-				throw new KFFReadWriteException( "The object '" + list.GetType().ToString() + "' is not a list." );
+				throw new KFFReadWriteException( "The object '" + list.GetType().ToString() + "' is not a list (" + path.ToString() + ")." );
 			}
 			serializableObj = new T[((IList)list).count];
 			for( int i = 0; i < serializableObj.Length; i++ )
