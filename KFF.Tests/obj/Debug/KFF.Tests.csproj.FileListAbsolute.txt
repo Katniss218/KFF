@@ -1,0 +1,17 @@
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\KFF.Tests.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\KFF.Tests.pdb
+E:\GIT\KFF\KFF.Tests\bin\Debug\KFF.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+E:\GIT\KFF\KFF.Tests\bin\Debug\KFF.pdb
+E:\GIT\KFF\KFF.Tests\bin\Debug\KFF.xml
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+E:\GIT\KFF\KFF.Tests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+E:\GIT\KFF\KFF.Tests\obj\Debug\KFF.Tests.csproj.AssemblyReference.cache
+E:\GIT\KFF\KFF.Tests\obj\Debug\KFF.Tests.csproj.CoreCompileInputs.cache
+E:\GIT\KFF\KFF.Tests\obj\Debug\KFF.Tests.csproj.CopyComplete
+E:\GIT\KFF\KFF.Tests\obj\Debug\KFF.Tests.dll
+E:\GIT\KFF\KFF.Tests\obj\Debug\KFF.Tests.pdb

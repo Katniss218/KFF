@@ -118,7 +118,7 @@ namespace KFF
 			this.pos += lineEnding.Length;
 		}
 		
-		private string Name()
+		public static string Name(string fileName, ref string s, ref int pos)
 		{
 			if( Syntax.IsAlphabetical( currentChar ) || currentChar == '_' ) // Nazwy TAG'ów zaczynają się literą lub '_'.
 			{
@@ -126,14 +126,14 @@ namespace KFF
 
 				do
 				{
-					sb.Append( currentChar );
+					sb.Append( s[pos] );
 					pos++;
 
 				} while( Syntax.IsAlphaNumerical( currentChar ) || currentChar == '_' );
 				
 				return sb.ToString();
 			}
-			throw new KFFParseException( "Expected to find [A-Za-z_], but found '" + currentChar + "' (" + TextFileData.Calculate( this.fileName, this.s, this.pos ) + ")." );
+			throw new KFFParseException( "Expected to find [A-Za-z_], but found '" + currentChar + "' (" + TextFileData.Calculate( fileName, s, pos ) + ")." );
 		}
 
 		private void Digits( ref StringBuilder sb )
@@ -510,7 +510,7 @@ namespace KFF
 		private Tag Tag()
 		{
 			// we start directly at the name.
-			string name = Name();
+			string name = Name(this.fileName, ref this.s, ref this.pos);
 
 			this.SkipWhiteSpacesAndComments();
 
@@ -582,8 +582,8 @@ namespace KFF
 		/// <summary>
 		/// Parses a string representation into a KFF file. Throws an exception if the string is malformed.
 		/// </summary>
-		/// <param name="fileName">The name of the file that will be parsed.</param>
-		/// <param name="s">The string to parse.</param>
+		/// <param name="fileName">How to name the resulting KFF file.</param>
+		/// <param name="s">The string of data to parse.</param>
 		public KFFFile Parse( string fileName, string s )
 		{
 			if( s == null )

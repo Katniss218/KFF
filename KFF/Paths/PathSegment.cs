@@ -6,23 +6,33 @@ namespace KFF
 	/// <summary>
 	/// Represents a segment of a KFFPath.
 	/// </summary>
-	internal struct PathSegment
+	public struct PathSegment
 	{
-		// Contains the name of the Tag that the path segment refers to, or a string representation of the index, null if the path goes backwards (Read Only).
-		internal readonly string name;
-		
-		// Contains the index of the Payload that the path segment refers to, -1 if N/A (Read Only).
-		internal readonly int index;
+		/// <summary>
+		/// Contains the name of the Tag that the path segment refers to, or a string representation of the index, null if the path goes backwards (Read Only).
+		/// </summary>
+		public readonly string name;
 
-		// Contains the destination of the path segment. Will be 'ObjectType.Tag' if the segment is named, 'ObjectType.Payload' if it's indexed (Read Only).
-		internal readonly ObjectType destination;
+		/// <summary>
+		/// Contains the index of the Payload that the path segment refers to, -1 if N/A (Read Only).
+		/// </summary>
+		public readonly int index;
 
-		// Contains the direction to take when traversing along the path. Forward to move deeper, Backward to move... back (Read Only).
-		internal readonly PathDirection direction;
-		
+		/// <summary>
+		/// Contains the destination of the path segment. Will be 'ObjectType.Tag' if the segment is named, 'ObjectType.Payload' if it's indexed (Read Only).
+		/// </summary>
+		public readonly ObjectType destination;
 
-		// Creates a new path segment from string.
-		internal PathSegment( string s, int[] placeholderValues )
+		/// <summary>
+		/// Contains the direction to take when traversing along the path. Forward to move deeper, Backward to move... back (Read Only).
+		/// </summary>
+		public readonly PathDirection direction;
+
+
+		/// <summary>
+		/// Creates a new path segment from a string and an array of placeholder values.
+		/// </summary>
+		public PathSegment( string s, int[] placeholderValues )
 		{
 			// A valid path segment is:
 			// - A Tag identifier (name), or an index, or a placeholder to an index (indicates forward path segment).
